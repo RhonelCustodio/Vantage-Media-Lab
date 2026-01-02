@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div id="logoutOverlay">
+    <div class="loader"></div>
+    <p style="font-weight: 600; letter-spacing: 1px;">Securing Session...</p>
+</div>
+
+    <header>
+    <div class="logo-container" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="cursor:pointer;">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M15 3h6v6"></path>
+                <path d="M9 21H3v-6"></path>
+                <path d="M21 3l-7 7"></path>
+                <path d="M3 21l7-7"></path>
+            </svg>
+        </div>
+        <div class="brand-text">
+            <span class="brand-main">VANTAGE</span>
+            <span class="brand-sub">ART LABS</span>
+        </div>
+    </div>
+    
+    <div class="user-controls">
+        <span id="userDisplay"></span>
+        <button onclick="handleLogout()" class="logout-btn">Logout</button>
+    </div>
+</header>
+
+    <div class="filter-bar">
+    <div class="desktop-filters">
+        <button class="filter-btn active" onclick="filterGallery('All')">All Works</button>
+        <button class="filter-btn" onclick="filterGallery('Photoshop')">Photoshop</button>
+        <button class="filter-btn" onclick="filterGallery('Procreate')">Procreate</button>
+        <button class="filter-btn" onclick="filterGallery('Illustrator')">Illustrator</button>
+        <button class="filter-btn" onclick="filterGallery('Clip Studio')">Clip Studio</button>
+    </div>
+
+    <select class="mobile-filter-dropdown" onchange="filterGallery(this.value)">
+        <option value="All">All Works</option>
+        <option value="Photoshop">Photoshop</option>
+        <option value="Procreate">Procreate</option>
+        <option value="Illustrator">Illustrator</option>
+        <option value="Clip Studio">Clip Studio</option>
+    </select>
+</div>
+
+    <div class="gallery-grid" id="mainGrid"></div>
+
+    <div style="text-align: center; padding: 40px 0;">
+        <button id="loadMoreBtn" style="background:var(--primary); color:white; border:none; padding: 15px 40px; border-radius:8px; font-weight:600; cursor:pointer;">
+            Load More Images
+        </button>
+    </div>
+
+    <div id="imageModal" onclick="closePreview()">
+        <img id="modalImg" src="" alt="Preview">
+    </div>
+
+    <footer class="main-footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <span class="brand-main">VANTAGE</span>
+            <span class="brand-sub">ART LABS</span>
+        </div>
+        <p class="copyright">&copy; 2026 Vantage Art Labs. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="legal_and_support.html">Privacy Policy | Terms of Service | Support</a>
+        </div>
+    </div>
+</footer>
+
+    <script type="module" src="dashboard.js"></script>
+</body>
+</html>
