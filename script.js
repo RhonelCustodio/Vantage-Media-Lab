@@ -1,22 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
-    getAuth, 
-    signInWithPopup, 
-    signInWithRedirect, 
-    getRedirectResult, 
-    GoogleAuthProvider 
+    getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { 
-    getFirestore, 
-    collection, 
-    addDoc, 
-    query, 
-    where, 
-    getDocs, 
-    serverTimestamp, 
-    doc, 
-    setDoc,
-    updateDoc 
+    getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, doc, setDoc, updateDoc 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 /* ==========================================================================
    1. FIREBASE SETUP
@@ -32,68 +19,105 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const loader = document.getElementById('loadingOverlay');
-const loaderText = document.getElementById('loaderText');
-const showLoader = (text) => {
-    if (loader) { loader.style.display = "flex"; loaderText.innerText = text; }
+// DOM Cache
+const UI = {
+    loginPage: document.getElementById('loginPage'),
+    signupPage: document.getElementById('signupPage'),
+    loader: document.getElementById('loadingOverlay'),
+    loaderText: document.getElementById('loaderText')
 };
-const hideLoader = () => { if (loader) loader.style.display = "none"; };
 /* ==========================================================================
-   2. SHARED SESSION HANDLER
+   2. UI UTILITIES & NAVIGATION
+   ========================================================================== */
+const showLoader = (text) => {
+    if (UI.loader) { UI.loader.style.display = "flex"; UI.loaderText.innerText = text; }
+};
+const hideLoader = () => { if (UI.loader) UI.loader.style.display = "none"; };
+/**
+ * FIXED: Navigation logic to switch between Login and Signup screens
+ */
+const navigateTo = (pageToShow, pageToHide) => {
+    pageToHide.classList.add('hidden');
+    pageToShow.classList.remove('hidden');
+    // Clear inputs when switching
+    document.querySelectorAll('input').forEach(input => input.value = "");
+};
+// Bind navigation buttons
+document.getElementById('toSignup').onclick = () => navigateTo(UI.signupPage, UI.loginPage);
+document.getElementById('toLogin').onclick = () => navigateTo(UI.loginPage, UI.signupPage);
+/* ==========================================================================
+   3. SHARED SESSION HANDLER
    ========================================================================== */
 async function finalizeUserSession(user, method, manualId = null) {
     showLoader("Syncing Secure Vault...");
     try {
         const uid = manualId || user.uid;
-        // This line makes the user "Online" in the Admin Panel
+        // Update user status to ONLINE in Firestore
         await setDoc(doc(db, "users", uid), {
             email: user.email,
-            lastLogin: serverTimestamp(), // SETS TO CURRENT TIME
+            lastLogin: serverTimestamp(),
             authProvider: method
         }, { merge: true });
+        // Save local session data
         localStorage.setItem("loggedInUser", user.email);
         localStorage.setItem("userUID", uid); 
-        setTimeout(() => { window.location.href = "dashboard.html"; }, 2000);
+        setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
     } catch (e) {
         hideLoader();
         alert("Database Sync Failed: " + e.message);
     }
 }
 /* ==========================================================================
-   3. AUTHENTICATION FLOWS
+   4. AUTHENTICATION FLOWS
    ========================================================================== */
 // --- GOOGLE AUTH ---
 const triggerGoogleAuth = async () => {
     const provider = new GoogleAuthProvider();
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     try {
-        if (isMobile) { await signInWithRedirect(auth, provider); } 
-        else {
+        if (isMobile) { 
+            await signInWithRedirect(auth, provider); 
+        } else {
             const result = await signInWithPopup(auth, provider);
             await finalizeUserSession(result.user, "google");
         }
-    } catch (error) { alert("Auth Failed: " + error.message); }
+    } catch (error) { 
+        alert("Auth Failed: " + error.message); 
+    }
 };
-// --- MANUAL SIGNUP (FIXED) ---
+// --- MANUAL SIGNUP (FIXED: Checks for duplicates) ---
 document.getElementById('saveBtn').onclick = async () => {
     const email = document.getElementById('regEmail').value.trim();
     const pass = document.getElementById('regPass').value.trim();
-    if (!email || !pass) return alert("Fields mandatory.");
+    if (!email || !pass) return alert("All fields are mandatory.");
     try {
+        showLoader("Verifying Account...");
+        // Step 1: Check if email already exists
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            hideLoader();
+            return alert("This email is already registered.");
+        }
+        // Step 2: Create new user
         showLoader("Creating Identity...");
         const newUserRef = await addDoc(collection(db, "users"), {
-            email,
+            email: email,
             password: pass,
             createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp(), // INDICATES ONLINE IMMEDIATELY
+            lastLogin: serverTimestamp(),
             authProvider: "manual"
         });
+        // Step 3: Save session and redirect
         localStorage.setItem("userUID", newUserRef.id);
         localStorage.setItem("loggedInUser", email);
         window.location.href = "dashboard.html"; 
-    } catch (e) { hideLoader(); alert("Error: " + e.message); }
+    } catch (e) { 
+        hideLoader(); 
+        alert("Signup Error: " + e.message); 
+    }
 };
-// --- MANUAL LOGIN (FIXED: NOW UPDATES ONLINE STATUS) ---
+// --- MANUAL LOGIN ---
 document.getElementById('loginBtn').onclick = async () => {
     const email = document.getElementById('loginEmail').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
@@ -106,26 +130,34 @@ document.getElementById('loginBtn').onclick = async () => {
         if (!snap.empty) {
             const userDoc = snap.docs[0];
             const userId = userDoc.id;
-            // CRITICAL FIX: Update lastLogin so Admin Panel sees "Online"
+            // Refresh lastLogin to mark as ONLINE
             await updateDoc(doc(db, "users", userId), {
                 lastLogin: serverTimestamp() 
             });
-            // Save for the Dashboard Logout script
             localStorage.setItem("loggedInUser", email);
             localStorage.setItem("userUID", userId); 
-            setTimeout(() => { window.location.href = "dashboard.html"; }, 2000);
+            setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
         } else {
             hideLoader();
             alert("Invalid Credentials.");
         }
-    } catch (e) { hideLoader(); alert("Login Failure: " + e.message); }
+    } catch (e) { 
+        hideLoader(); 
+        alert("Login Failure: " + e.message); 
+    }
 };
 /* ==========================================================================
-   4. INITIALIZATION
+   5. PAGE INITIALIZATION
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', async () => {
-    const result = await getRedirectResult(auth);
-    if (result) await finalizeUserSession(result.user, "google");
+    // Handle redirect results for mobile Google login
+    try {
+        const result = await getRedirectResult(auth);
+        if (result) await finalizeUserSession(result.user, "google");
+    } catch (error) {
+        console.error("Redirect Error:", error);
+    }
+    // Attach Google Auth to button
     const googleBtn = document.getElementById('googleLogin');
     if (googleBtn) googleBtn.onclick = triggerGoogleAuth;
 });
