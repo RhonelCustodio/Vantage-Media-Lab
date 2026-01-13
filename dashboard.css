@@ -1,0 +1,406 @@
+/* ==========================================================================
+   1. GLOBAL VARIABLES & CONFIGURATION
+   ========================================================================== */
+   :root {
+    /* Updated Midnight Slate Palette */
+    --brand: #7c3aed;
+    --brand-dark: #6d28d9;
+    --brand-glow: rgba(124, 58, 237, 0.2);
+    --success: #2dd4bf;
+    --danger: #fb7185;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.08);
+    --radius: 4px;
+    /* Effects (Updated for Dark Mode) */
+    --glass: rgba(30, 41, 59, 0.7); /* Darker semi-transparent slate */
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 12px 24px -6px rgba(0, 0, 0, 0.5);
+    /* Transitions */
+    --transition-fast: 0.2s;
+    --transition-smooth: 0.3s ease;
+}
+/* ==========================================================================
+   2. BASE STYLES & RESET
+   ========================================================================== */
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: var(--bg);
+    /* Subtle radial glow to add depth to the dark background */
+    background-image: radial-gradient(circle at top right, rgba(124, 58, 237, 0.05), transparent);
+    margin: 0; 
+    color: var(--text-main);
+    line-height: 1.5;
+}
+/* ==========================================================================
+   3. LAYOUT STRUCTURE
+   ========================================================================== */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 12px 20px; 
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+.filter-bar {
+    position: sticky;
+    top: 61px;
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    padding: 16px 20px;
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.gallery-grid {
+    display: grid;
+    /* Binabaan natin ang 300px sa 150px para magkasya ang apat sa screen */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+    gap: 12px; /* Mas maliit na gap para sa mas maliit na cards */
+    padding: 20px 10px;
+}
+.main-footer {
+    margin-top: 60px;
+    padding: 40px 20px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+}
+/* ==========================================================================
+   4. BRANDING & NAVIGATION
+   ========================================================================== */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer; 
+}
+.brand-icon {
+    background: var(--brand);
+    color: white;
+    width: 30px; 
+    height: 30px;
+    border-radius: 8px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    box-shadow: 0 0 15px var(--brand-glow);
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1; }
+.brand-main { font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; color: var(--text-main); }
+.brand-sub { font-weight: 600; font-size: 0.65rem; letter-spacing: 3px; color: var(--brand); margin-top: 2px; }
+#userDisplay { font-weight: 600; font-size: 0.85rem; color: var(--text-muted); }
+/* ==========================================================================
+   5. UI COMPONENTS
+   ========================================================================== */
+.logout-btn {
+    background: transparent;
+    color: var(--danger);
+    border: 1.5px solid rgba(251, 113, 133, 0.2); /* Muted danger border */
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.logout-btn:hover { background: rgba(251, 113, 133, 0.1); border-color: var(--danger); }
+.filter-btn {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface-light);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    flex-shrink: 0;
+}
+.filter-btn.active { 
+    background: var(--brand); 
+    color: white; 
+    border-color: var(--brand); 
+    box-shadow: 0 4px 10px var(--brand-glow);
+}
+.filter-btn:hover:not(.active) { background: var(--surface); border-color: var(--text-muted); }
+.mobile-filter-dropdown { display: none; }
+/* Media Cards */
+.media-card {
+    position: relative;
+    background: var(--surface); 
+    border-radius: var(--radius); 
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+.media-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: rgba(255,255,255,0.15); }
+.img-wrapper { 
+    position: relative; 
+    height: 160px; /* Binabaan mula 240px */
+    overflow: hidden; 
+    cursor: zoom-in; 
+    background: var(--bg); 
+}.img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+.exif-overlay {
+    position: absolute; 
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.9)); 
+    color: white;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-end; /* Text at bottom looks better in dark theme */
+    padding: 20px; 
+    opacity: 0; 
+    font-size: 0.8rem;
+    transition: var(--transition-smooth);
+}
+.media-card:hover .exif-overlay { opacity: 1; }
+.card-footer { 
+    padding: 16px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: flex-start; 
+    background: var(--surface);
+    color: var(--text-main);
+    /* Idagdag ito: */
+    position: relative; 
+    min-height: 60px; 
+}
+.download-link {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    color: var(--brand); /* O var(--text-muted) depende sa gusto mo */
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    line-height: 0;
+    height: 25px;
+    width: 25px;
+}
+
+.download-link:hover {
+    background: var(--brand);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--brand-glow);
+}
+/* Footer Specifics */
+.footer-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+.footer-links a:hover { color: var(--brand); }
+.copyright { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
+/* ==========================================================================
+   6. MODALS, LOADERS & ANIMATIONS (FIXED)
+   ========================================================================== */
+#logoutOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.95); /* Deep slate background */
+    backdrop-filter: blur(12px);
+    z-index: 9999; /* Higher than header and all UI */
+    display: none; /* Controlled by JS */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: var(--text-main);
+}
+.loader {
+    display: block; /* Overriding the 'none' in your previous snippet */
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--surface-light);
+    border-top: 4px solid var(--brand); /* Purple brand color */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 15px var(--brand-glow);
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+/* Image Modal Fix (for consistency) */
+#imageModal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+#imageModal.active {
+    display: flex;
+}
+/* ==========================================================================
+   7. RESPONSIVE DESIGN (MOBILE)
+   ========================================================================== */
+@media (max-width: 425px) {
+    .mobile-filter-dropdown {
+        display: block; 
+        width: 100%;
+        margin-top: .85rem;
+        position: static;
+        max-width: 300px;
+        padding: 5px 15px; 
+        border-radius: 8px; 
+        border: 1px solid var(--border);
+        background: var(--surface-light) no-repeat right 15px center / 15px;
+        color: var(--text-main);
+        /* Arrow color updated to match palette */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        font-weight: 500; 
+        appearance: none;
+        outline: none;
+    }
+    .desktop-filters {
+        display: none;
+    }
+    .user-controls {
+        padding-left: 2.5rem;
+    }
+    .gallery-grid {
+        /* Ginawa nating 4 columns pero may sapat na gap */
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 8px; 
+        padding: 15px 8px;
+    }
+    .img-wrapper {
+        height: 90px; /* Mas maliit na height para sa mobile grid */
+    }
+    .card-footer {
+        padding: 6px; /* Binawasan ang space sa paligid ng text */
+        flex-direction: column; /* Pagpatungin ang Title at Software label */
+        align-items: flex-start;
+        gap: 2px;
+    }
+    strong { font-size: 0.5rem !important; }
+    .software { font-size: 0.45rem !important; }
+    svg { width: 15px !important; height: 12px !important; }
+    span { font-size: 5rem; }
+    .download-link svg { width: 12px !important; height: 12px !important; }
+    .download-link {
+        height: 20px;
+        width: 20px;
+    }
+
+    .card-footer h3, .card-title { 
+        font-size: 0.65rem !important; /* Liitan ang font */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Lalagyan ng "..." kung mahaba ang pangalan */
+        width: 100%;
+    }
+
+    .software-label {
+        font-size: 0.55rem !important;
+        font-weight: 500;
+    }
+    /* Liitan ang padding ng main card para hindi masikip sa loob */
+    .media-card {
+        border-radius: 8px;
+        height: 10rem;
+        width: 5.8rem;
+         /* Mas maliit na radius para sa maliit na card */
+    }
+    
+    .brand-main { font-size: 1rem; }
+    
+}
+#imageModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.98); /* Matching your --bg palette */
+    backdrop-filter: blur(20px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 10px; /* Crucial for mobile gutter */
+    cursor: zoom-out;
+}
+#modalImg {
+    max-width: 95vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+#imageModal.active #modalImg {
+    opacity: 1;
+    transform: scale(1);
+}
+/* Specific Mobile Optimization */
+@media (max-width: 320px) {
+    #modalImg {
+        max-width: 100vw;
+        max-height: 80vh; /* Leave room for thumbs */
+        border-radius: 0; /* Full width looks better on mobile */
+    }
+}
+
+@media (max-width: 375px) {
+    .gallery-grid {
+        /* Ginawa nating 4 columns pero may sapat na gap */
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 8px; 
+        padding: 15px 8px;
+    }
+    .media-card {
+        height: 10rem;
+        width: 7rem;
+    }
+}
+@media (max-width: 425px) {
+    .gallery-grid {
+        /* Ginawa nating 4 columns pero may sapat na gap */
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 8px; 
+        padding: 15px 8px;
+    }
+    .media-card {
+        height: 12rem;
+        width: 8rem;
+    }
+    .img-wrapper { 
+        position: relative; 
+        height: 125px; /* Binabaan mula 240px */
+        overflow: hidden; 
+        cursor: zoom-in; 
+        background: var(--bg); 
+    }
+    .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+}
