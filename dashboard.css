@@ -263,78 +263,6 @@ header {
 /* ==========================================================================
    7. RESPONSIVE DESIGN (MOBILE)
    ========================================================================== */
-@media (max-width: 425px) {
-    .mobile-filter-dropdown {
-        display: block; 
-        width: 100%;
-        margin-top: .85rem;
-        position: static;
-        max-width: 300px;
-        padding: 5px 15px; 
-        border-radius: 8px; 
-        border: 1px solid var(--border);
-        background: var(--surface-light) no-repeat right 15px center / 15px;
-        color: var(--text-main);
-        /* Arrow color updated to match palette */
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-        font-weight: 500; 
-        appearance: none;
-        outline: none;
-    }
-    .desktop-filters {
-        display: none;
-    }
-    .user-controls {
-        padding-left: 2.5rem;
-    }
-    .gallery-grid {
-        /* Ginawa nating 4 columns pero may sapat na gap */
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 8px; 
-        padding: 15px 8px;
-    }
-    .img-wrapper {
-        height: 90px; /* Mas maliit na height para sa mobile grid */
-    }
-    .card-footer {
-        padding: 6px; /* Binawasan ang space sa paligid ng text */
-        flex-direction: column; /* Pagpatungin ang Title at Software label */
-        align-items: flex-start;
-        gap: 2px;
-    }
-    strong { font-size: 0.5rem !important; }
-    .software { font-size: 0.45rem !important; }
-    svg { width: 15px !important; height: 12px !important; }
-    span { font-size: 5rem; }
-    .download-link svg { width: 12px !important; height: 12px !important; }
-    .download-link {
-        height: 20px;
-        width: 20px;
-    }
-
-    .card-footer h3, .card-title { 
-        font-size: 0.65rem !important; /* Liitan ang font */
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis; /* Lalagyan ng "..." kung mahaba ang pangalan */
-        width: 100%;
-    }
-
-    .software-label {
-        font-size: 0.55rem !important;
-        font-weight: 500;
-    }
-    /* Liitan ang padding ng main card para hindi masikip sa loob */
-    .media-card {
-        border-radius: 8px;
-        height: 10rem;
-        width: 5.8rem;
-         /* Mas maliit na radius para sa maliit na card */
-    }
-    
-    .brand-main { font-size: 1rem; }
-    
-}
 #imageModal {
     position: fixed;
     inset: 0;
@@ -363,44 +291,48 @@ header {
     opacity: 1;
     transform: scale(1);
 }
-/* Specific Mobile Optimization */
-@media (max-width: 320px) {
-    #modalImg {
-        max-width: 100vw;
-        max-height: 80vh; /* Leave room for thumbs */
-        border-radius: 0; /* Full width looks better on mobile */
-    }
-}
 
-@media (max-width: 375px) {
+@media (max-width: 600px) {
     .gallery-grid {
-        /* Ginawa nating 4 columns pero may sapat na gap */
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 8px; 
-        padding: 15px 8px;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Mas maliit na cards para sa mobile */
+        gap: 8px; /* Mas maliit na gap */
+        padding: 10px 5px;
     }
-    .media-card {
-        height: 10rem;
-        width: 7rem;
+    .img-wrapper { height: 120px; } /* Mas maliit na image height */
+    .filter-bar {
+        padding: 12px 10px;
     }
-}
-@media (max-width: 425px) {
-    .gallery-grid {
-        /* Ginawa nating 4 columns pero may sapat na gap */
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 8px; 
-        padding: 15px 8px;
+    .filter-btn {
+        padding: 6px 16px;
+        font-size: 0.75rem;
     }
-    .media-card {
-        height: 12rem;
-        width: 8rem;
+    .card-footer {
+        padding: 12px;
+        font-size: 0.9rem;
     }
-    .img-wrapper { 
-        position: relative; 
-        height: 125px; /* Binabaan mula 240px */
-        overflow: hidden; 
-        cursor: zoom-in; 
-        background: var(--bg); 
+    .mobile-filter-dropdown {
+        display: block; 
+        width: 100%;
+        margin-top: .85rem;
+        position: static;
+        max-width: 300px;
+        padding: 5px 15px; 
+        border-radius: 8px; 
+        border: 1px solid var(--border);
+        background: var(--surface-light) no-repeat right 15px center / 15px;
+        color: var(--text-main);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        font-weight: 500; 
+        appearance: none;
+        outline: none;
     }
-    .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    .desktop-filters {
+        display: none;
+    }
+    .user-controls {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 5px;
+        display: flex;
+    }
 }
